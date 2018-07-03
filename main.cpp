@@ -2,6 +2,16 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
+#include <iterator>
+#include <numeric>
+
+#define DEBUG
+
+#ifdef DEBUG
+#define DEBUG_STDOUT(x) (std::cout << (x))
+#else
+#define DEBUG_STDOUT(x)
+#endif
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -28,11 +38,11 @@ int main() {
 
         first_line_pos = findLinePos(nurb_file, filename, first_line_txt);
         deleteLines(filename, 0, first_line_pos - 1);
-        cout << first_line_pos << "\r\n";
+        DEBUG_STDOUT(first_line_pos + "\r\n");
         last_line_pos = findLinePos(nurb_file, filename, last_line_txt);
-        cout << last_line_pos << "\r\n";
+        DEBUG_STDOUT(last_line_pos + "\r\n");
         end_of_file_pos = findLinePos(nurb_file, filename, end_of_file_txt);
-        cout << end_of_file_pos << "\r\n";
+        DEBUG_STDOUT(end_of_file_pos + "\r\n");
         if(last_line_pos != -1)
         {
             deleteLines(filename, last_line_pos, end_of_file_pos-last_line_pos);
@@ -74,11 +84,10 @@ void deleteLines(const std::string &filename, size_t start, size_t skip) {
         for (size_t i = 0; i < skip; i++)
             deleteend++;
         filelines.erase(deletebegin, deleteend);
+
         std::ofstream outfile(filename.c_str(), std::ios::out | std::ios::trunc);
         if (outfile.is_open()) {
-            for (std::list<std::string>::const_iterator sli = filelines.begin();
-                 sli != filelines.end(); sli++)
-                outfile << *sli << "\n";
+            copy(filelines.begin(), filelines.end(), ostream_iterator<string>(outfile, "\n"));
         }
         outfile.close();
     } else {
